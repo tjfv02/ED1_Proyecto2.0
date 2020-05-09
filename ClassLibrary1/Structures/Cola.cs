@@ -33,6 +33,13 @@ namespace ClassLibrary1.Structures
             temp.Siguiente = inicio.Siguiente;
             inicio.Siguiente = temp;
         }
+        
+        //public T DevolverPrimero()
+        //{
+        //    var value = Peek();
+        //    return value;
+        //}
+
         public T Eliminar()
         {
             var value = Peek();

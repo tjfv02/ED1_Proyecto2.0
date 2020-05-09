@@ -49,6 +49,7 @@ namespace ED1_ProyectoCOVID.Controllers
 
                 Paciente AgregarPaciente = new Paciente()
                 {
+                    Id = DatosPacientes.Count,
                     //Datos Personales
                     Edad = Convert.ToInt32(collection["Edad"]),
                     Nombre = collection["Nombre"],
@@ -64,14 +65,13 @@ namespace ED1_ProyectoCOVID.Controllers
                     Prioridad = CalcularPrioridad(Convert.ToInt32(collection["Edad"]), collection["EstadoPaciente"]=="Confirmado"),
                     Fecha = collection["Fecha"],
                     HoraIngreso = collection["HoraIngreso"],
-                    EstadoPaciente = collection["EstadoPaciente"]
-
+                    EstadoPaciente = collection["EstadoPaciente"],
+                    Accion = "Examinar"
 
                 };
                 
-                ////Datos Generales 
+                LlenarConfirmados(ref AgregarPaciente);
                 DatosPacientes.Add(AgregarPaciente);
-                LlenarConfirmados();
 
                 //if (AgregarPaciente.EstadoPaciente == "Confirmado")
                 //{
@@ -141,33 +141,64 @@ namespace ED1_ProyectoCOVID.Controllers
                 return View();
             }
         }
-
-        void LlenarConfirmados()
+        //Llena cola 
+        void LlenarConfirmados(ref Paciente PacienteActual)
         {
-            
-            Paciente PacienteActual = DatosPacientes[DatosPacientes.Count - 1];
-            if (PacienteActual.EstadoPaciente=="Confirmado")
+
+            // Paciente PacienteActual = DatosPacientes[DatosPacientes.Count - 1];
+
+            if (PacienteActual.EstadoPaciente == "Confirmado")
             {
-                ColaConfirmados.Insertar(DatosPacientes.Count - 1, PacienteActual.Prioridad);   
-                AsignarCama();
+                ColaConfirmados.Insertar(DatosPacientes.Count, PacienteActual.Prioridad);
+                //DatosPacientes[DatosPacientes.Count - 1] = PacienteActual;
+
+                //Asignando Hospital
+                for (int i = 0; i < DatosDepartamentos.Count - 1; i++)
+                {
+                    if (PacienteActual.Departamento == DatosDepartamentos[i].Nombre)
+                    {
+                        //asignar region al paciente 
+                        PacienteActual.HospitalAsignado = DatosDepartamentos[i].Region;
+                    }
+                }
+
+                int indice = ColaConfirmados.Eliminar();
+
+                if (indice == DatosPacientes.Count)
+                {
+                    AsignarCama(ref PacienteActual,indice);
+
+                }
+                else
+                {
+                    Paciente PacienteTemp = DatosPacientes[indice];
+                    AsignarCama(ref PacienteTemp,indice);
+                }
+
+
             }
 
         }
-        void AsignarCama()
+        void AsignarCama(ref Paciente PacienteCola, int indice)
         {
-            Paciente PacienteCola = DatosPacientes[ColaConfirmados.Eliminar()];
+            bool HayCama = false;
 
-            for (int i = 0; i < DatosDepartamentos.Count - 1; i++)
+            for (int i = 0; i < 50; i++)
             {
-                if (PacienteCola.Departamento == DatosDepartamentos[i].Nombre)
+                if (Camas[i].NombreHospital == PacienteCola.HospitalAsignado && Camas[i].Disponible)
                 {
-                    //asignar region al paciente 
-                    PacienteCola.HospitalAsignado = DatosDepartamentos[i].Region;
-
+                    Camas[i].Disponible = false;
+                    PacienteCola.CamaAsignada = Camas[i].Id;
+                    HayCama = true;
+                    PacienteCola.Accion = "Recuperado";
+                    break;
                 }
             }
-                PacienteCola.CamaAsignada = "abcd";
-            
+            if (!HayCama)
+            {
+                ColaConfirmados.Insertar(indice, PacienteCola.Prioridad);
+            }
+           
         }
 
         int CalcularPrioridad (int Edad, bool Confirmado)
@@ -175,36 +206,36 @@ namespace ED1_ProyectoCOVID.Controllers
             //Definicion de Prioridad 
             if (Confirmado && Edad > 60)
             {
-               return  1;
+               return  8;
             }
             if (Confirmado && Edad < 1)
             {
-                return 2;
+                return 7;
             }
             if (Confirmado && Edad > 18 && Edad <= 60)
             {
-                return 3;
+                return 6;
             }
 
             if (!Confirmado  && Edad > 60)
             {
-                return 4;
+                return 5;
             }
             if (Confirmado && Edad >= 1 && Edad <= 18)
             {
-                return 5;
+                return 4;
             }
             if (!Confirmado && Edad < 1)
             {
-                return 6;
+                return 3;
             }
             if (!Confirmado && Edad > 18 && Edad <= 60)
             {
-                return 7;
+                return 2;
             }
             if (!Confirmado && Edad >= 1 && Edad <= 18)
             {
-                return 8;
+                return 1;
             }
             return 1;
         }
@@ -235,7 +266,7 @@ namespace ED1_ProyectoCOVID.Controllers
                     default:
                         break;
                 }
-                var hash = i.GetHashCode();
+                var hash = i.ToString().GetHashCode().ToString("x");
                 Camas.Add(new Cama()
                 {
                     Id = hash.ToString(),
@@ -301,7 +332,7 @@ namespace ED1_ProyectoCOVID.Controllers
                 DatosDepartamentos.Add(new Departamentos()
                 {
                     Id = 9,
-                    Nombre = "Guatemla",
+                    Nombre = "Guatemala",
                     Region = "Centro"
 
                 });
@@ -399,7 +430,80 @@ namespace ED1_ProyectoCOVID.Controllers
 
                 });
 
-                f
+                
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+        public ActionResult Examinar(int id)
+        {
+            return View();
+        }
+
+        // POST: Pacientes/Examinar
+        [HttpPost]
+        public ActionResult Examinar(int id, FormCollection collection)
+        {
+            try
+            {
+
+                var rand = new Random();
+                SimulacionExamen PruebaContagio = new SimulacionExamen()
+                {
+                    ViajeEuropa = collection["ViajeEuropa"] != "false",
+                    ConocidoContagiado = collection["ConocidoContagiado"] != "false",
+                    FamiliarContagiado = collection["FamiliarContagiado"] != "false",
+                    ReunionesSociales = collection["ReunionesSociales"] != "false"
+
+                };
+
+                int Porcentaje = 5;
+
+                if (PruebaContagio.ViajeEuropa)
+                {
+                    Porcentaje += 10;
+                }
+                if (PruebaContagio.ConocidoContagiado)
+                {
+                    Porcentaje += 15;
+                }
+                if (PruebaContagio.FamiliarContagiado)
+                {
+                    Porcentaje += 30;
+                }
+                if (PruebaContagio.ReunionesSociales)
+                {
+                    Porcentaje += 5;
+                }
+
+
+                Paciente PacienteSimulado = DatosPacientes[id];
+
+                PacienteSimulado.EstadoPaciente = Porcentaje > 34 ? "Confirmado" : "Sospechoso";
+
+                PacienteSimulado.Prioridad = CalcularPrioridad(PacienteSimulado.Edad, PacienteSimulado.EstadoPaciente=="Confirmado");
+
+                LlenarConfirmados(ref PacienteSimulado);
+
+
+                if (PacienteSimulado.EstadoPaciente == "Sospechoso")
+                {
+                    DatosPacientes[id].EstadoPaciente = "Sano";
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception x)
+            {
+                return View();
             }
 
         }

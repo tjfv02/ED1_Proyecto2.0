@@ -28,5 +28,7 @@ namespace ED1_ProyectoCOVID.Models
         public string HospitalAsignado { get; set; }
         public string CamaAsignada { get; set; }
 
+        public string Accion { get; set; }
+
     }
 }

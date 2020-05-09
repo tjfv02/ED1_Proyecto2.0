@@ -53,6 +53,9 @@
         <th>
             @Html.DisplayNameFor(model => model.CamaAsignada)
         </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Accion)
+        </th>
         <th></th>
     </tr>
 
@@ -101,9 +104,12 @@
             @Html.DisplayFor(modelItem => item.CamaAsignada)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            @Html.DisplayFor(modelItem => item.Accion)
+        </td>
+        <td>
+            @Html.ActionLink(item.Accion, item.Accion, new { id=item.Id }) 
+            @*@Html.ActionLink("Details", "Details", new { id=item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.Id })*@
         </td>
     </tr>
 }

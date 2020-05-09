@@ -178,6 +178,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Pacientes\Create.cshtml" />
     <Content Include="Views\Pacientes\Index.cshtml" />
+    <Content Include="Views\Pacientes\Examinar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
