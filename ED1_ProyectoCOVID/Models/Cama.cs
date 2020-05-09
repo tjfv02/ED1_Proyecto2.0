@@ -8,5 +8,8 @@ namespace ED1_ProyectoCOVID.Models
     public class Cama
     {
         public string Id { get; set; }
+        public string NombreHospital { get; set; }
+
+        public bool Disponible { get; set; }
     }
 }
