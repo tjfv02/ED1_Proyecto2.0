@@ -70,26 +70,9 @@ namespace ED1_ProyectoCOVID.Controllers
 
                 };
                 
-                LlenarConfirmados(ref AgregarPaciente);
                 DatosPacientes.Add(AgregarPaciente);
-
-                //if (AgregarPaciente.EstadoPaciente == "Confirmado")
-                //{
-                //    PacientesInfectados.Add(AgregarPaciente);
-                //    //Se agragaría a la cola de infectados
-
-                //    PacienteActual = PacientesInfectados.Count - 1;
-                //    ColaConfirmados.Insertar(AgregarPaciente.Identificacion, AgregarPaciente.Prioridad);
-
-
-                //}
-                //else
-                //{
-                //    //PacientesSospechosos.Add(AgregarPaciente);
-                //    ColaSospechosos.Insertar(AgregarPaciente.Identificacion, AgregarPaciente.Prioridad);
-                //    return RedirectToAction("SimularExamen");
-                //}
-
+                LlenarConfirmados(ref AgregarPaciente);
+                
                 return RedirectToAction("Index");
             }
             catch
@@ -147,56 +130,50 @@ namespace ED1_ProyectoCOVID.Controllers
 
             // Paciente PacienteActual = DatosPacientes[DatosPacientes.Count - 1];
 
-            if (PacienteActual.EstadoPaciente == "Confirmado")
+           if (PacienteActual.EstadoPaciente == "Confirmado")
             {
-                ColaConfirmados.Insertar(DatosPacientes.Count, PacienteActual.Prioridad);
+                ColaConfirmados.Insertar(PacienteActual.Id, PacienteActual.Prioridad);
                 //DatosPacientes[DatosPacientes.Count - 1] = PacienteActual;
-
-                //Asignando Hospital
-                for (int i = 0; i < DatosDepartamentos.Count - 1; i++)
-                {
-                    if (PacienteActual.Departamento == DatosDepartamentos[i].Nombre)
-                    {
-                        //asignar region al paciente 
-                        PacienteActual.HospitalAsignado = DatosDepartamentos[i].Region;
-                    }
-                }
-
-                int indice = ColaConfirmados.Eliminar();
-
-                if (indice == DatosPacientes.Count)
-                {
-                    AsignarCama(ref PacienteActual,indice);
-
-                }
-                else
-                {
-                    Paciente PacienteTemp = DatosPacientes[indice];
-                    AsignarCama(ref PacienteTemp,indice);
-                }
-
-
+                AsignarHospital(PacienteActual.Id);
+                 AsignarCama();
             }
 
         }
-        void AsignarCama(ref Paciente PacienteCola, int indice)
+
+        void AsignarHospital(int indice)
+        {
+            //Asignando Hospital
+            for (int i = 0; i < DatosDepartamentos.Count - 1; i++)
+            {
+                if (DatosPacientes[indice].Departamento == DatosDepartamentos[i].Nombre)
+                {
+                    //asignar region al paciente 
+                    DatosPacientes[indice].HospitalAsignado = DatosDepartamentos[i].Region;
+                }
+            }
+        }
+
+        void AsignarCama( ) //Paciente PacienteCola, int indice)
         {
             bool HayCama = false;
+            int indice = ColaConfirmados.DevolverPrimero();
+
+            AsignarHospital(indice);
 
             for (int i = 0; i < 50; i++)
             {
-                if (Camas[i].NombreHospital == PacienteCola.HospitalAsignado && Camas[i].Disponible)
+                if (Camas[i].NombreHospital == DatosPacientes[indice].HospitalAsignado && Camas[i].Disponible)
                 {
                     Camas[i].Disponible = false;
-                    PacienteCola.CamaAsignada = Camas[i].Id;
+                    DatosPacientes[indice].CamaAsignada = Camas[i].Id;
                     HayCama = true;
-                    PacienteCola.Accion = "Recuperado";
+                    DatosPacientes[indice].Accion = "Recuperado";
                     break;
                 }
             }
-            if (!HayCama)
+            if (HayCama)
             {
-                ColaConfirmados.Insertar(indice, PacienteCola.Prioridad);
+                ColaConfirmados.Eliminar();
             }
            
         }
@@ -242,194 +219,198 @@ namespace ED1_ProyectoCOVID.Controllers
         void LlenarListas()
         {
             //Llenar Camas
-            for (int i = 0; i < 50; i++)
+            if (Camas.Count == 0)
             {
-                string THospital = "";
-                switch ((i+10)/10)
-                {
-                    case 1:
-                        THospital = "Centro";
-                        break;
-                    case 2:
-                        THospital = "Norte";
-                        break;
-                    case 3:
-                        THospital = "Sur";
-                        break;
-                    case 4:
-                        THospital = "Oriente";
-                        break;
-                    case 5:
-                        THospital = "Occidente";
-                        break;
+               
 
-                    default:
-                        break;
+                for (int i = 0; i < 50; i++)
+                {
+                    string THospital = "";
+                    switch ((i + 10) / 10)
+                    {
+                        case 1:
+                            THospital = "Centro";
+                            break;
+                        case 2:
+                            THospital = "Norte";
+                            break;
+                        case 3:
+                            THospital = "Sur";
+                            break;
+                        case 4:
+                            THospital = "Oriente";
+                            break;
+                        case 5:
+                            THospital = "Occidente";
+                            break;
+
+                        default:
+                            break;
+                    }
+                    var hash = i.ToString().GetHashCode().ToString("x");
+                    Camas.Add(new Cama()
+                    {
+                        Id = hash.ToString(),
+                        NombreHospital = THospital,
+                        Disponible = true
+                    });
+
+                    //Llenar Departamentos 
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 1,
+                        Nombre = "Alta Verapaz",
+                        Region = "Norte"
+                    });
+
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+
+                        Id = 2,
+                        Nombre = "Baja Verapaz",
+                        Region = "Norte"
+                    });
+
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+
+                        Id = 3,
+                        Nombre = "Chimaltenango",
+                        Region = "Centro"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 4,
+                        Nombre = "Chiquimula",
+                        Region = "Oriente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 5,
+                        Nombre = "Peten",
+                        Region = "Norte"
+
+                    }); DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 6,
+                        Nombre = "El Progreso",
+                        Region = "Oriente"
+
+                    }); DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 7,
+                        Nombre = "Quiche",
+                        Region = "Occidente"
+
+                    }); DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 8,
+                        Nombre = "Escuintla",
+                        Region = "Sur"
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 9,
+                        Nombre = "Guatemala",
+                        Region = "Centro"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 10,
+                        Nombre = "Huehuetenango",
+                        Region = "Occidente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 11,
+                        Nombre = "Izabal",
+                        Region = "Oriente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 12,
+                        Nombre = "Jalapa",
+                        Region = "Oriente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+
+                        Id = 13,
+                        Nombre = "Jutiapa",
+                        Region = "Oriente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 14,
+                        Nombre = "Quetzaltenango",
+                        Region = "Occidente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 15,
+                        Nombre = "Retalhuleu",
+                        Region = "Occidente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 16,
+                        Nombre = "Sacatepequez",
+                        Region = "Centro"
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 17,
+                        Nombre = "San Marcos",
+                        Region = "Occidente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 18,
+                        Nombre = "Santa Rosa",
+                        Region = "Oriente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 19,
+                        Nombre = "Solola",
+                        Region = "Occidente"
+
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 20,
+                        Nombre = "Suchitepequez",
+                        Region = "Occidente"
+
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 21,
+                        Nombre = "Totonicapan",
+                        Region = "Occidente"
+
+                    });
+                    DatosDepartamentos.Add(new Departamentos()
+                    {
+                        Id = 22,
+                        Nombre = "Zacapa",
+                        Region = "Oriente"
+
+                    });
                 }
-                var hash = i.ToString().GetHashCode().ToString("x");
-                Camas.Add(new Cama()
-                {
-                    Id = hash.ToString(),
-                    NombreHospital = THospital,
-                    Disponible = true 
-                });
-
-                //Llenar Departamentos 
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 1,
-                    Nombre = "Alta Verapaz",
-                    Region = "Norte"
-                });
-
-                DatosDepartamentos.Add(new Departamentos()
-                {
-
-                    Id = 2,
-                    Nombre = "Baja Verapaz",
-                    Region = "Norte"
-                });
-
-                DatosDepartamentos.Add(new Departamentos()
-                {
-
-                    Id = 3,
-                    Nombre = "Chimaltenango",
-                    Region = "Centro"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 4,
-                    Nombre = "Chiquimula",
-                    Region = "Oriente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 5,
-                    Nombre = "Peten",
-                    Region = "Norte"
-
-                }); DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 6,
-                    Nombre = "El Progreso",
-                    Region = "Oriente"
-
-                }); DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 7,
-                    Nombre = "Quiche",
-                    Region = "Occidente"
-
-                }); DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 8,
-                    Nombre = "Escuintla",
-                    Region = "Sur"
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 9,
-                    Nombre = "Guatemala",
-                    Region = "Centro"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 10,
-                    Nombre = "Huehuetenango",
-                    Region = "Occidente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 11,
-                    Nombre = "Izabal",
-                    Region = "Oriente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 12,
-                    Nombre = "Jalapa",
-                    Region = "Oriente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-
-                    Id = 13,
-                    Nombre = "Jutiapa",
-                    Region = "Oriente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 14,
-                    Nombre = "Quetzaltenango",
-                    Region = "Occidente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 15,
-                    Nombre = "Retalhuleu",
-                    Region = "Occidente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 16,
-                    Nombre = "Sacatepequez",
-                    Region = "Centro"
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 17,
-                    Nombre = "San Marcos",
-                    Region = "Occidente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 18,
-                    Nombre = "Santa Rosa",
-                    Region = "Oriente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 19,
-                    Nombre = "Solola",
-                    Region = "Occidente"
-
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 20,
-                    Nombre = "Suchitepequez",
-                    Region = "Occidente"
-
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 21,
-                    Nombre = "Totonicapan",
-                    Region = "Occidente"
-
-                });
-                DatosDepartamentos.Add(new Departamentos()
-                {
-                    Id = 22,
-                    Nombre = "Zacapa",
-                    Region = "Oriente"
-
-                });
-
                 
             }
 

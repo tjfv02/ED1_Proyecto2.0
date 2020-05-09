@@ -14,6 +14,9 @@ namespace ClassLibrary1.Structures
             {
                 Primero = NuevoNodo(valor, prioridad);
             }
+            else
+            {
+
             Nodo<T> inicio = Primero;
 
             Nodo<T> temp = NuevoNodo(valor, prioridad);
@@ -32,7 +35,15 @@ namespace ClassLibrary1.Structures
             }
             temp.Siguiente = inicio.Siguiente;
             inicio.Siguiente = temp;
+            }
         }
+
+        public T DevolverPrimero()
+        {
+            var value = Peek();
+            return value;
+        }
+
         public T Eliminar()
         {
             var value = Peek();
