@@ -183,6 +183,7 @@
     <Content Include="Views\Pacientes\PaginaPrincipal.cshtml" />
     <Content Include="Views\Pacientes\Estadisticas.cshtml" />
     <Content Include="Views\Pacientes\Busqueda.cshtml" />
+    <Content Include="Views\Pacientes\ResultadoBusqueda.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

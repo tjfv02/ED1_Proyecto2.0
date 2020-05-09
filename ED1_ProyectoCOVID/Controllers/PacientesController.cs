@@ -10,7 +10,7 @@ namespace ED1_ProyectoCOVID.Controllers
 {
     public class PacientesController : Controller
     {
-        public static ABB<string> IndiceNombre = new ABB<string>();
+        public static ABB<string > IndiceNombre = new ABB<string>();
         public static ABB<string> IndiceApellido = new ABB<string>();
         public static ABB<string> IndiceIde = new ABB<string>();
 
@@ -22,6 +22,7 @@ namespace ED1_ProyectoCOVID.Controllers
 
         public static HashTable<string, Cama> DatosCama = new HashTable<string, Cama>();
 
+        public static List<Paciente> ResultBusqueda = new List<Paciente>();
         public static List<Departamentos> DatosDepartamentos = new List<Departamentos>();
         public static List<Paciente> DatosPacientes = new List<Paciente>();
         public static List<Cama> Camas = new List<Cama>();
@@ -500,6 +501,10 @@ namespace ED1_ProyectoCOVID.Controllers
             return RedirectToAction("Index");
         }
 
+        public ActionResult ResultadoBusqueda()
+        {
+            return View(ResultBusqueda);
+        }
 
         public ActionResult Busqueda()
         {
@@ -516,12 +521,61 @@ namespace ED1_ProyectoCOVID.Controllers
                 Apellido = collection["Apellido"],
                 Identificacion = collection["Identificacion"]
             };
-            int search = IndiceNombre.Buscar(BuscarPaciente.Nombre);
-            int search2 = IndiceApellido.Buscar(BuscarPaciente.Apellido);
-            int search3 = IndiceIde.Buscar(BuscarPaciente.Identificacion);
+            int[] search = IndiceNombre.Buscar(BuscarPaciente.Nombre);
+            int[] search2 = IndiceApellido.Buscar(BuscarPaciente.Apellido);
+            int[] search3 = IndiceIde.Buscar(BuscarPaciente.Identificacion);
 
+            ResultBusqueda.Clear();
+            try
+            {
+            if (search!=null )
+            {
+                for (int i = 0; i < search.Length; i++)
+                {
+                    ResultBusqueda.Add(DatosPacientes[search[i]]);
+                }
+            }
 
-            return RedirectToAction("");
+            }
+            catch (Exception)
+            {
+
+                return RedirectToAction("ResultadoBusqueda");
+            }
+            try
+            {
+            if (search2 != null)
+            {
+                for (int i = 0; i < search.Length; i++)
+                {
+                    ResultBusqueda.Add(DatosPacientes[search2[i]]);
+                }
+            }
+
+            }
+            catch (Exception)
+            {
+
+                return RedirectToAction("ResultadoBusqueda");
+            }
+            try
+            {
+            if (search3 != null)
+            {
+                for (int i = 0; i < search.Length; i++)
+                {
+                    ResultBusqueda.Add(DatosPacientes[search3[i]]);
+                }
+            }
+
+            }
+            catch (Exception)
+            {
+
+                return RedirectToAction("ResultadoBusqueda");
+            }
+
+            return RedirectToAction("ResultadoBusqueda");
         }
 
 

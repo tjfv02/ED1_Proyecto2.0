@@ -7,17 +7,22 @@ namespace ED1_ProyectoCOVID.Structures
     public class ABB<T>
     {
 
-        private  Nodo<T> Raiz = new Nodo<T>();
+        private Nodo<T> Raiz = new Nodo<T>();
 
         //----------------------------------Metodos Arbol------------------------------------------------
         public Nodo<T> Insertar(T valor, int id)
         {
             Nodo<T> Temp;
-            if (Raiz.Valor == null)
+            if (valor.ToString() == "")
+            {
+                return null;
+            }
+           else if (Raiz.Valor == null)
             {
                 Raiz.Valor = valor;
                 Raiz.Altura = 0;
-                Raiz.Referencia = id;
+                Raiz.Referencia = new int[1];
+                Raiz.Referencia[0 ] = id;
                 Temp = Raiz;
             }
             else
@@ -26,6 +31,8 @@ namespace ED1_ProyectoCOVID.Structures
                 // si es igual
                 if (valor.ToString().CompareTo(Raiz.Valor.ToString()) == 0)
                 {
+                    Raiz.Expandir(Raiz.Referencia.Length + 1);
+                    Raiz.Referencia[Raiz.Referencia.Length-1] = id;
                     Temp = Raiz;
                 }
                 //Si es mayor
@@ -55,8 +62,10 @@ namespace ED1_ProyectoCOVID.Structures
                 hoja = new Nodo<T>();
                 hoja.Valor = valor;
                 hoja.Padre = padre;
-                hoja.Altura = Altura;
-                hoja.Referencia = id;
+                // hoja.Altura = Altura;
+                hoja.Referencia = new int[1];
+                hoja.Referencia[0] = id;
+                //hoja.Referencia[hoja.Referencia.Length] = id;
                 Temp = hoja;
             }
             else
@@ -64,6 +73,11 @@ namespace ED1_ProyectoCOVID.Structures
                 // si es igual
                 if (valor.ToString().CompareTo(hoja.Valor.ToString()) == 0)
                 {
+                    //hoja.Referencia = new int[hoja.Referencia.Length + 1];
+                    //Array.Resize(ref hoja.Referencia, 10);
+
+                    hoja.Expandir(hoja.Referencia.Length + 1);
+                    hoja.Referencia[hoja.Referencia.Length -1] = id;
                     Temp = hoja;
                 }
                 //Si es mayor
@@ -83,10 +97,26 @@ namespace ED1_ProyectoCOVID.Structures
 
         }
 
-        public int Buscar(T valor)
+        public int[] Buscar(T valor)
         {
-            Nodo<T> Temp = BuscarNodo(valor, Raiz);
-            return Temp.Referencia;
+            if (valor.ToString() == "")
+            {
+                return null;
+            }
+            else
+            {
+                Nodo<T> Temp = BuscarNodo(valor, Raiz);
+                if (Temp!=null)
+                {
+                    return Temp.Referencia;
+
+                }
+                else
+                {
+
+                return null;
+                }
+            }
         }
 
         private Nodo<T> BuscarNodo(T valor, Nodo<T> hoja)

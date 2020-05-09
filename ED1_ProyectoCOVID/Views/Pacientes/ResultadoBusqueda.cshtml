@@ -1,16 +1,13 @@
 ﻿@model IEnumerable<ED1_ProyectoCOVID.Models.Paciente>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "ResultadoBusqueda";
 }
 
-<h2>Pacientes Registrados</h2>
+<h2>ResultadoBusqueda</h2>
 
 <p>
-    @Html.ActionLink("Registrar Nuevo Paciente", "Create")
-</p>
-<p>
-    @Html.ActionLink(" Buscar", "Busqueda")
+    @Html.ActionLink("Nueva Busqueda", "Busqueda")
 </p>
 <table class="table">
     <tr>
@@ -38,9 +35,9 @@
         <th>
             @Html.DisplayNameFor(model => model.Sintomas)
         </th>
-        @*<th>
+        <th>
             @Html.DisplayNameFor(model => model.DescripcionContagioPosible)
-        </th>*@
+        </th>
         <th>
             @Html.DisplayNameFor(model => model.Fecha)
         </th>
@@ -56,9 +53,9 @@
         <th>
             @Html.DisplayNameFor(model => model.CamaAsignada)
         </th>
-        @*<th>
+        <th>
             @Html.DisplayNameFor(model => model.Accion)
-        </th>*@
+        </th>
         <th></th>
     </tr>
 
@@ -88,9 +85,9 @@
         <td>
             @Html.DisplayFor(modelItem => item.Sintomas)
         </td>
-        @*<td>
+        <td>
             @Html.DisplayFor(modelItem => item.DescripcionContagioPosible)
-        </td>*@
+        </td>
         <td>
             @Html.DisplayFor(modelItem => item.Fecha)
         </td>
@@ -106,13 +103,13 @@
         <td>
             @Html.DisplayFor(modelItem => item.CamaAsignada)
         </td>
-        @*<td>
-            @Html.DisplayFor(modelItem => item.Accion)
-        </td>*@
         <td>
-            @Html.ActionLink(item.Accion, item.Accion, new { id=item.Id }) 
-            @*@Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })*@
+            @Html.DisplayFor(modelItem => item.Accion)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
         </td>
     </tr>
 }
