@@ -7,7 +7,10 @@ namespace ClassLibrary1.Structures
     class Cola<T>
     {
         private Nodo<T> Primero { get; set; }
-
+        public bool HayDatos()
+        {
+            return Primero != null;
+        }
         public void Insertar(T valor, int prioridad)
         {
             if (Primero == null)
@@ -40,8 +43,8 @@ namespace ClassLibrary1.Structures
 
         public T DevolverPrimero()
         {
-            var value = Peek();
-            return value;
+                var value = Peek();
+                return value;
         }
 
         public T Eliminar()
@@ -56,10 +59,14 @@ namespace ClassLibrary1.Structures
             {
                 Primero = Primero.Siguiente;
             }
+           
         }
         protected T Peek()// --> Primer valor de la cola 
         {
-            return Primero.Valor;
+            
+                return Primero.Valor;
+        
+            
         }
 
         public static Nodo<T> NuevoNodo(T valor, int prioridad)

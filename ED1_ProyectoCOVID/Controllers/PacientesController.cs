@@ -129,9 +129,10 @@ namespace ED1_ProyectoCOVID.Controllers
         {
 
             // Paciente PacienteActual = DatosPacientes[DatosPacientes.Count - 1];
-
+            PacienteActual.Prioridad = CalcularPrioridad(PacienteActual.Edad, PacienteActual.EstadoPaciente=="Confirmado");
            if (PacienteActual.EstadoPaciente == "Confirmado")
             {
+            
                 ColaConfirmados.Insertar(PacienteActual.Id, PacienteActual.Prioridad);
                 //DatosPacientes[DatosPacientes.Count - 1] = PacienteActual;
                 AsignarHospital(PacienteActual.Id);
@@ -156,24 +157,29 @@ namespace ED1_ProyectoCOVID.Controllers
         void AsignarCama( ) //Paciente PacienteCola, int indice)
         {
             bool HayCama = false;
-            int indice = ColaConfirmados.DevolverPrimero();
-
-            AsignarHospital(indice);
-
-            for (int i = 0; i < 50; i++)
+            if (ColaConfirmados.HayDatos())
             {
-                if (Camas[i].NombreHospital == DatosPacientes[indice].HospitalAsignado && Camas[i].Disponible)
+
+
+                int indice = ColaConfirmados.DevolverPrimero();
+
+                AsignarHospital(indice);
+
+                for (int i = 0; i < 50; i++)
                 {
-                    Camas[i].Disponible = false;
-                    DatosPacientes[indice].CamaAsignada = Camas[i].Id;
-                    HayCama = true;
-                    DatosPacientes[indice].Accion = "Recuperado";
-                    break;
+                    if (Camas[i].NombreHospital == DatosPacientes[indice].HospitalAsignado && Camas[i].Disponible)
+                    {
+                        Camas[i].Disponible = false;
+                        DatosPacientes[indice].CamaAsignada = Camas[i].Id;
+                        HayCama = true;
+                        DatosPacientes[indice].Accion = "Recuperado";
+                        break;
+                    }
                 }
-            }
-            if (HayCama)
-            {
-                ColaConfirmados.Eliminar();
+                if (HayCama)
+                {
+                    ColaConfirmados.Eliminar();
+                }
             }
            
         }
@@ -183,36 +189,36 @@ namespace ED1_ProyectoCOVID.Controllers
             //Definicion de Prioridad 
             if (Confirmado && Edad > 60)
             {
-               return  8;
+               return  1;
             }
             if (Confirmado && Edad < 1)
             {
-                return 7;
+                return 2;
             }
             if (Confirmado && Edad > 18 && Edad <= 60)
             {
-                return 6;
+                return 3;
             }
 
             if (!Confirmado  && Edad > 60)
             {
-                return 5;
+                return 4;
             }
             if (Confirmado && Edad >= 1 && Edad <= 18)
             {
-                return 4;
+                return 5;
             }
             if (!Confirmado && Edad < 1)
             {
-                return 3;
+                return 6;
             }
             if (!Confirmado && Edad > 18 && Edad <= 60)
             {
-                return 2;
+                return 7;
             }
             if (!Confirmado && Edad >= 1 && Edad <= 18)
             {
-                return 1;
+                return 8;
             }
             return 1;
         }
@@ -411,11 +417,49 @@ namespace ED1_ProyectoCOVID.Controllers
 
                     });
                 }
-                
+
+                var rnd = new Random();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    DatosPacientes.Add(new Paciente()
+                    {
+                        Id = i,
+                        Edad = rnd.Next(0, 90),
+                        Nombre="a">"b",
+                        Departamento = "Guatemala",
+                        EstadoPaciente = "Confirmado"
+                        
+                    });
+                    Paciente x = DatosPacientes[i];
+                    LlenarConfirmados(ref x);
+                }
+
             }
 
         }
 
+        public ActionResult Recuperado(int id)
+        {
+            DatosPacientes[id].EstadoPaciente = "Sano";
+            DatosPacientes[id].Accion = "Examinar";
+
+            for (int i = 0; i < 50; i++)
+            {
+                if ( DatosPacientes[id].CamaAsignada == Camas[i].Id)
+                {
+                    Camas[i].Disponible = true;
+                    
+                    break;
+                }
+            }
+
+            DatosPacientes[id].CamaAsignada = "";
+            AsignarCama();
+            return RedirectToAction("Index");
+        }
+
+       
 
 
 
@@ -423,8 +467,7 @@ namespace ED1_ProyectoCOVID.Controllers
 
 
 
-
-        public ActionResult Examinar(int id)
+            public ActionResult Examinar(int id)
         {
             return View();
         }
