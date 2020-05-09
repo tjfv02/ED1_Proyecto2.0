@@ -10,6 +10,18 @@ namespace ED1_ProyectoCOVID.Controllers
 {
     public class PacientesController : Controller
     {
+        public static ABB<string> IndiceNombre = new ABB<string>();
+        public static ABB<string> IndiceApellido = new ABB<string>();
+        public static ABB<string> IndiceIde = new ABB<string>();
+
+
+        public static double SospechosoAPositivos;
+        public static int Sospechosos;
+        public static int Confirmados;
+        public static int Recuperados;
+
+        public static HashTable<string, Cama> DatosCama = new HashTable<string, Cama>();
+
         public static List<Departamentos> DatosDepartamentos = new List<Departamentos>();
         public static List<Paciente> DatosPacientes = new List<Paciente>();
         public static List<Cama> Camas = new List<Cama>();
@@ -17,7 +29,15 @@ namespace ED1_ProyectoCOVID.Controllers
         //Colas 
         private static Cola<int> ColaConfirmados = new Cola<int>();
         private static Cola<string> ColaSospechosos = new Cola<string>();
-        
+
+        public int SospechsoAPositivos { get; private set; }
+
+        // GET: Pacientes
+        public ActionResult PaginaPrincipal()
+        {
+
+            return View();
+        }
 
         // GET: Pacientes
         public ActionResult Index()
@@ -43,7 +63,10 @@ namespace ED1_ProyectoCOVID.Controllers
         [HttpPost]
         public ActionResult Create(FormCollection collection)
         {
+            
             LlenarListas();
+
+
             try
             {
 
@@ -63,13 +86,26 @@ namespace ED1_ProyectoCOVID.Controllers
                     Sintomas = collection["Sintomas"],
                     DescripcionContagioPosible = collection["DescripcionContagioPosible"],
                     Prioridad = CalcularPrioridad(Convert.ToInt32(collection["Edad"]), collection["EstadoPaciente"]=="Confirmado"),
-                    Fecha = collection["Fecha"],
-                    HoraIngreso = collection["HoraIngreso"],
+                    Fecha = DateTime.Now.ToLongDateString(),
+                    HoraIngreso = DateTime.Now.ToString("hh:mm:ss"),
                     EstadoPaciente = collection["EstadoPaciente"],
                     Accion = "Examinar"
 
                 };
-                
+                if(AgregarPaciente.EstadoPaciente=="Confirmado")
+                {
+                    Confirmados++;
+                }
+                else
+                {
+                    Sospechosos++;     
+                }
+                //Llenar indices busqueda
+                IndiceNombre.Insertar(AgregarPaciente.Nombre, AgregarPaciente.Id);
+                IndiceApellido.Insertar(AgregarPaciente.Apellido, AgregarPaciente.Id);
+                IndiceIde.Insertar(AgregarPaciente.Identificacion, AgregarPaciente.Id);
+
+                //Llenar lista, cola 
                 DatosPacientes.Add(AgregarPaciente);
                 LlenarConfirmados(ref AgregarPaciente);
                 
@@ -257,9 +293,12 @@ namespace ED1_ProyectoCOVID.Controllers
                     Camas.Add(new Cama()
                     {
                         Id = hash.ToString(),
+                        Correlativo=i,
                         NombreHospital = THospital,
                         Disponible = true
                     });
+
+                    DatosCama.Insertar(hash.ToString(), Camas[i]);
 
                     //Llenar Departamentos 
                     DatosDepartamentos.Add(new Departamentos()
@@ -420,20 +459,19 @@ namespace ED1_ProyectoCOVID.Controllers
 
                 var rnd = new Random();
 
-                for (int i = 0; i < 10; i++)
-                {
-                    DatosPacientes.Add(new Paciente()
-                    {
-                        Id = i,
-                        Edad = rnd.Next(0, 90),
-                        Nombre="a">"b",
-                        Departamento = "Guatemala",
-                        EstadoPaciente = "Confirmado"
+                //for (int i = 0; i < 10; i++)
+                //{
+                //    DatosPacientes.Add(new Paciente()
+                //    {
+                //        Id = i,
+                //        Edad = rnd.Next(0, 90),
+                //        Departamento = "Guatemala",
+                //        EstadoPaciente = "Confirmado"
                         
-                    });
-                    Paciente x = DatosPacientes[i];
-                    LlenarConfirmados(ref x);
-                }
+                //    });
+                //    Paciente x = DatosPacientes[i];
+                //    LlenarConfirmados(ref x);
+                //}
 
             }
 
@@ -441,25 +479,50 @@ namespace ED1_ProyectoCOVID.Controllers
 
         public ActionResult Recuperado(int id)
         {
+            Recuperados++;
             DatosPacientes[id].EstadoPaciente = "Sano";
             DatosPacientes[id].Accion = "Examinar";
+            Cama Liberar = DatosCama.Get(DatosPacientes[id].CamaAsignada);
+            Camas[Liberar.Correlativo].Disponible = true;
 
-            for (int i = 0; i < 50; i++)
-            {
-                if ( DatosPacientes[id].CamaAsignada == Camas[i].Id)
-                {
-                    Camas[i].Disponible = true;
-                    
-                    break;
-                }
-            }
+            //for (int i = 0; i < 50; i++)
+            //{
+            //    if ( DatosPacientes[id].CamaAsignada == Camas[i].Id)
+            //    {
+            //        Camas[i].Disponible = true;
+
+            //        break;
+            //    }
+            //}
 
             DatosPacientes[id].CamaAsignada = "";
             AsignarCama();
             return RedirectToAction("Index");
         }
 
-       
+
+        public ActionResult Busqueda()
+        {
+            return View();
+        }
+
+        // POST: Pacientes/Examinar
+        [HttpPost]
+        public ActionResult Busqueda(FormCollection collection)
+        {
+            Paciente BuscarPaciente = new Paciente()
+            {
+                Nombre=collection["Nombre"],
+                Apellido = collection["Apellido"],
+                Identificacion = collection["Identificacion"]
+            };
+            Nodo<string> search = IndiceNombre.Buscar(BuscarPaciente.Nombre);
+            Nodo<string> search2 = IndiceApellido.Buscar(BuscarPaciente.Apellido);
+            Nodo<string> search3 = IndiceIde.Buscar(BuscarPaciente.Identificacion);
+
+            return RedirectToAction("");
+        }
+
 
 
 
@@ -512,7 +575,7 @@ namespace ED1_ProyectoCOVID.Controllers
                 Paciente PacienteSimulado = DatosPacientes[id];
 
                 PacienteSimulado.EstadoPaciente = Porcentaje > 34 ? "Confirmado" : "Sospechoso";
-
+                if (Porcentaje > 3) SospechosoAPositivos++;
                 PacienteSimulado.Prioridad = CalcularPrioridad(PacienteSimulado.Edad, PacienteSimulado.EstadoPaciente=="Confirmado");
 
                 LlenarConfirmados(ref PacienteSimulado);
@@ -520,7 +583,9 @@ namespace ED1_ProyectoCOVID.Controllers
 
                 if (PacienteSimulado.EstadoPaciente == "Sospechoso")
                 {
+
                     DatosPacientes[id].EstadoPaciente = "Sano";
+                   
                 }
 
                 return RedirectToAction("Index");
@@ -530,6 +595,25 @@ namespace ED1_ProyectoCOVID.Controllers
                 return View();
             }
 
+        }
+        public ActionResult Estadisticas()
+        {
+            List<Estadisticas> DatosEstadisticas = new List<Estadisticas>();
+            double SaP = 0;
+            if (Sospechosos>0)
+            {
+                SaP = SospechosoAPositivos / Sospechosos ;
+            }
+           
+            DatosEstadisticas.Add(new Estadisticas()
+            {
+                Ingreso_Contagiados = Confirmados,
+                Ingreso_Sospechosos=Sospechosos,
+                Sospechosos_A_Positivos = SaP,
+                Cantidad_Egresados= Recuperados
+            
+            });
+            return View(DatosEstadisticas);
         }
     }
 }

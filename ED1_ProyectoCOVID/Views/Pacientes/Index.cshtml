@@ -4,10 +4,10 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Pacientes Registrados</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Registrar Nuevo Paciente", "Create")
 </p>
 <table class="table">
     <tr>
@@ -35,9 +35,9 @@
         <th>
             @Html.DisplayNameFor(model => model.Sintomas)
         </th>
-        <th>
+        @*<th>
             @Html.DisplayNameFor(model => model.DescripcionContagioPosible)
-        </th>
+        </th>*@
         <th>
             @Html.DisplayNameFor(model => model.Fecha)
         </th>
@@ -53,9 +53,9 @@
         <th>
             @Html.DisplayNameFor(model => model.CamaAsignada)
         </th>
-        <th>
+        @*<th>
             @Html.DisplayNameFor(model => model.Accion)
-        </th>
+        </th>*@
         <th></th>
     </tr>
 
@@ -85,9 +85,9 @@
         <td>
             @Html.DisplayFor(modelItem => item.Sintomas)
         </td>
-        <td>
+        @*<td>
             @Html.DisplayFor(modelItem => item.DescripcionContagioPosible)
-        </td>
+        </td>*@
         <td>
             @Html.DisplayFor(modelItem => item.Fecha)
         </td>
@@ -103,9 +103,9 @@
         <td>
             @Html.DisplayFor(modelItem => item.CamaAsignada)
         </td>
-        <td>
+        @*<td>
             @Html.DisplayFor(modelItem => item.Accion)
-        </td>
+        </td>*@
         <td>
             @Html.ActionLink(item.Accion, item.Accion, new { id=item.Id }) 
             @*@Html.ActionLink("Details", "Details", new { id=item.Id }) |

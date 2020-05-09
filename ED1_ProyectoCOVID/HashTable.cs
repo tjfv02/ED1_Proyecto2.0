@@ -59,15 +59,15 @@ namespace ClassLibrary1.Structures
             }
         }
 
-        //public TU Get(T key)
-        //{
-        //    var pos = PosicionEnHash(key, items.Length);
-        //    foreach (var item in items[pos].Where(item => item.Item1.Equals(key)))
-        //    {
-        //        return item.Item2;
-        //    }
-        //    throw new KeyNotFoundException("La llave no existe en la tabla hash.");
-        //}
+        public TU Get(T key)
+        {
+            var pos = PosicionEnHash(key, items.Length);
+            foreach (var item in items[pos].Where(item => item.Item1.Equals(key)))
+            {
+                return item.Item2;
+            }
+            throw new KeyNotFoundException("La llave no existe en la tabla hash.");
+        }
 
         private void ReHashing() // Crea nuevamente la tabla e ingresa los datos 
         {

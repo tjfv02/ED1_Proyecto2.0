@@ -132,6 +132,7 @@
     <Compile Include="HashTable.cs" />
     <Compile Include="Models\Cama.cs" />
     <Compile Include="Models\Departamentos.cs" />
+    <Compile Include="Models\Estadisticas.cs" />
     <Compile Include="Models\Hospital.cs" />
     <Compile Include="Models\Paciente.cs" />
     <Compile Include="Models\SimulacionExamen.cs" />
@@ -179,6 +180,9 @@
     <Content Include="Views\Pacientes\Create.cshtml" />
     <Content Include="Views\Pacientes\Index.cshtml" />
     <Content Include="Views\Pacientes\Examinar.cshtml" />
+    <Content Include="Views\Pacientes\PaginaPrincipal.cshtml" />
+    <Content Include="Views\Pacientes\Estadisticas.cshtml" />
+    <Content Include="Views\Pacientes\Busqueda.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
