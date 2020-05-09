@@ -1,6 +1,6 @@
 ﻿using ED1_ProyectoCOVID.Models;
 using System;
-using ClassLibrary1.Structures;
+using ED1_ProyectoCOVID.Structures;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -516,9 +516,10 @@ namespace ED1_ProyectoCOVID.Controllers
                 Apellido = collection["Apellido"],
                 Identificacion = collection["Identificacion"]
             };
-            Nodo<string> search = IndiceNombre.Buscar(BuscarPaciente.Nombre);
-            Nodo<string> search2 = IndiceApellido.Buscar(BuscarPaciente.Apellido);
-            Nodo<string> search3 = IndiceIde.Buscar(BuscarPaciente.Identificacion);
+            int search = IndiceNombre.Buscar(BuscarPaciente.Nombre);
+            int search2 = IndiceApellido.Buscar(BuscarPaciente.Apellido);
+            int search3 = IndiceIde.Buscar(BuscarPaciente.Identificacion);
+
 
             return RedirectToAction("");
         }

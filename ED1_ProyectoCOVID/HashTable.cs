@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClassLibrary1.Structures
+namespace ED1_ProyectoCOVID.Structures
 {
     public class HashTable<T, TU>
     { //Comentario comprobando que no de el error otra vez

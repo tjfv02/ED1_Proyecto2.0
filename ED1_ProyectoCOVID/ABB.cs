@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassLibrary1.Structures
+namespace ED1_ProyectoCOVID.Structures
 {
     public class ABB<T>
     {
 
-        public static Nodo<T> Raiz = new Nodo<T>();
+        private  Nodo<T> Raiz = new Nodo<T>();
 
         //----------------------------------Metodos Arbol------------------------------------------------
         public Nodo<T> Insertar(T valor, int id)
@@ -83,10 +83,10 @@ namespace ClassLibrary1.Structures
 
         }
 
-        public Nodo<T> Buscar(T valor)
+        public int Buscar(T valor)
         {
             Nodo<T> Temp = BuscarNodo(valor, Raiz);
-            return Temp;
+            return Temp.Referencia;
         }
 
         private Nodo<T> BuscarNodo(T valor, Nodo<T> hoja)

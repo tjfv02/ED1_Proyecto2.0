@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassLibrary1.Structures
+namespace ED1_ProyectoCOVID.Structures
 {
     public class Nodo<T>
     {
